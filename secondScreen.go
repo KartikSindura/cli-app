@@ -12,10 +12,9 @@ type screenTwoModel struct {
 }
 
 func makeTable(index int) table.Model {
-	var tbl table.Model
 	switch index {
 	case 0:
-		tbl = getAllRecipesByName()
+		return getAllRecipesByName()
 	// case 1:
 	// 	tbl = getRecipeByName()
 	// case 2:
@@ -27,13 +26,13 @@ func makeTable(index int) table.Model {
 	// case 5:
 	// 	tbl = getPopularRecipes()
 	}
-	return tbl
+	return table.Model{}
 }
 
 func newSecondScreen(m menu) screenTwoModel {
 	return screenTwoModel{
 		menu:  m,
-		// table: makeTable(m.index),
+		table: makeTable(m.index),
 	}
 }
 
@@ -59,9 +58,9 @@ func (s screenTwoModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
 func (s screenTwoModel) View() string {
-	return lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(s.table.View()))
+	// return lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(lipgloss.Place()))
+	return baseStyle.Render(s.table.View())
 }

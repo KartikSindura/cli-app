@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
+	// "os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -69,8 +69,6 @@ func (m menu) View() string {
 	return lipgloss.JoinVertical(lipgloss.Left, headerStyle.Render("   Some Recipe App\n"), strings.Join(options, "\n"), helpMenuStyle.Render("\n   Enter/space to select, arrow keys to navigate, or Ctrl+C to exit."))
 }
 
-var conn *pgx.Conn
-
 func newInitalScreen(prevIndex int) menu {
 	m := menu{
 		items: []menuItem{
@@ -104,32 +102,21 @@ func newInitalScreen(prevIndex int) menu {
 	return m
 }
 
+var conn *pgx.Conn
+
 func main() {
-	// defer conn.Close(context.Background())
-	f, err := tea.LogToFile("debug.log", "debug")
+
+	var err error
+	ctx := context.Background()
+	envFile, _ := godotenv.Read(".env")
+	conn, err = pgx.Connect(ctx, envFile["DATABASE_URL"])
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
-	defer f.Close()
-
+	defer conn.Close(ctx)
+	
 	p := tea.NewProgram(newInitalScreen(0), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
-
-	envFile, _ := godotenv.Read(".env")
-	conn, err = pgx.Connect(context.Background(), envFile["DATABASE_URL"])
-	if err != nil {
-		log.Fatal(err)
-	}
-	query, _ := conn.Query(context.Background(), "select * from recipe")
-	if err != nil {
-		log.Fatal(err)
-	}
-	rows, _ := pgx.CollectRows(query, pgx.RowToStructByName[recipe])
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Print(rows)
 }
