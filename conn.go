@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/evertras/bubble-table/table"
 	"github.com/jackc/pgx/v5"
@@ -24,18 +25,6 @@ func getRecipe() []Recipe {
 
 func getAllRecipesByName() table.Model {
 	entries := getRecipe()
-	// rows := []table.Row{}
-	// for _, o := range entries {
-		// 	rows = append(rows, table.NewRow(table.RowData{
-			// 		"Name":         o.Name,
-			// 		"Recipeid":     o.Recipeid,
-	// 		"Description":  o.Description,
-	// 		"Instructions": o.Instructions,
-	// 		// "Preptime":     o.Preptime,
-	// 		// "Cooktime":     o.Cooktime,
-	// 		// "Totaltime":    o.Totaltime,
-	// 	}))
-	// }
 	length := len("Name")
 	rows := []table.Row{}
 	for _, o := range entries {
@@ -46,20 +35,51 @@ func getAllRecipesByName() table.Model {
 	}
 	columns := []table.Column{
 		table.NewColumn("Name", "Name", length),
-		// table.NewColumn("Recipeid", "Recipeid", len("Recipeid")),
-		// table.NewColumn("Description", "Description", len("Description")),
-		// table.NewColumn("Instructions", "Instructions", len("Instructions")),
-		// table.NewColumn("Preptime", "Preptime", len("Preptime")),
-		// table.NewColumn("Cooktime", "Cooktime", len("Cooktime")),
-		// table.NewColumn("Totaltime", "Totaltime", len("Totaltime")),
 	}
 	tbl := table.New(columns).WithRows(rows)
 	return tbl
 }
 
-func getRecipeByName() table.Model {
-	
+func getRecipeByName(prompt string) table.Model {
+
+	var res Recipe
+	query := fmt.Sprintf("SELECT * FROM recipe WHERE LOWER(name) LIKE LOWER('%%%s%%')", prompt)
+	err := conn.QueryRow(context.Background(), query).Scan(&res.Recipeid, &res.Name, &res.Description, &res.Instructions, &res.Preptime, &res.Cooktime, &res.Totaltime)
+	length := lenRecipe{
+		lenid:    8,
+		lenname:  len(res.Name),
+		lendesc:  len(res.Description),
+		lenins:   len(res.Instructions),
+		lenprep:  8,
+		lencook:  8,
+		lentotal: 9,
+	}
+	if err != nil {
+		fmt.Println("err: ", err, prompt)
+	}
+
+	rows := []table.Row{table.NewRow(table.RowData{
+		"Recipeid":     res.Recipeid,
+		"Name":         res.Name,
+		"Description":  res.Description,
+		"Instructions": res.Instructions,
+		"Preptime":     res.Preptime.Format(time.TimeOnly),
+		"Cooktime":     res.Cooktime.Format(time.TimeOnly),
+		"Totaltime":    res.Totaltime.Format(time.TimeOnly),
+	})}
+	columns := []table.Column{
+		table.NewColumn("Recipeid", "Recipeid", length.lenid),
+		table.NewColumn("Name", "Name", length.lenname),
+		table.NewColumn("Description", "Description", length.lendesc),
+		table.NewColumn("Instructions", "Instructions", length.lenins),
+		table.NewColumn("Preptime", "Preptime", length.lenprep),
+		table.NewColumn("Cooktime", "Cooktime", length.lencook),
+		table.NewColumn("Totaltime", "Totaltime", length.lentotal),
+	}
+	tbl := table.New(columns).WithRows(rows)
+	return tbl
 }
+
 // func gethRecipeByIngredient() table.Model {
 
 // }

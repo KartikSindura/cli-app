@@ -15,11 +15,11 @@ type menu struct {
 
 type menuItem struct {
 	text string
-	fn   func() tea.Msg
+	msg  tea.Msg
 }
 
 type Recipe struct {
-	Recipeid     int 
+	Recipeid     int
 	Name         string
 	Description  string
 	Instructions string
@@ -28,3 +28,12 @@ type Recipe struct {
 	Totaltime    time.Time
 }
 
+type lenRecipe struct {
+	lenid    int
+	lenname  int
+	lendesc  int
+	lenins   int
+	lenprep  int
+	lencook  int
+	lentotal int
+}

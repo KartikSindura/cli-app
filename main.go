@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+
 	// "os"
 	"strings"
 
@@ -46,7 +47,7 @@ func (m menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "enter", " ":
 			// return m, m.items[m.index].fn
-			return newSecondScreen(m).Update(msg)
+			return newSecondScreen(m).Update(m.items[m.index].msg)
 		}
 		// case toggle:
 		// 	switch m.index {
@@ -74,27 +75,27 @@ func newInitalScreen(prevIndex int) menu {
 		items: []menuItem{
 			menuItem{
 				text: "See a list of all recipes by name",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 			menuItem{
 				text: "Search for a recipe by name",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 			menuItem{
 				text: "Search for a list of recipes by ingredient",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 			menuItem{
 				text: "View your favourites list",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 			menuItem{
 				text: "Edit your favourites list",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 			menuItem{
 				text: "See a list of the most popular recipes",
-				fn:   func() tea.Msg { return toggle{} },
+				msg:  toggle{},
 			},
 		},
 		index: prevIndex,
@@ -114,7 +115,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close(ctx)
-	
+
 	p := tea.NewProgram(newInitalScreen(0), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
