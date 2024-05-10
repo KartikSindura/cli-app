@@ -1,1 +1,1 @@
-# cli-app
+# tui-app
